@@ -1,0 +1,31 @@
+# https://stackoverflow.com/questions/59813998/github-actions-splitting-workflow-file
+
+name: deploy-to-vercel
+inputs:
+  project_id:
+    description: key
+    required: true
+  custom_domain:
+    description: key
+    required: true
+  is_production:
+    description: key
+    required: true
+  create_comment:
+    description: key
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Deploy to Vercel
+      uses: BetaHuhn/deploy-to-vercel-action@v1
+      with:
+        VERCEL_PROJECT_ID: ${{ inputs.project_id }}
+        CREATE_COMMENT: ${{ inputs.create_comment }} # Create pull request comment?
+        PRODUCTION: ${{ inputs.is_production }} # Deploy to production environment?
+        BUILD_ENV: |
+          PORT=3000
+          NEXT_TELEMETRY_DISABLED=1
+          NODE_ENV=production
+        ALIAS_DOMAINS: ${{ inputs.custom_domain }}
+        PR_PREVIEW_DOMAIN: "{REPO}-{PR}.vercel.app"

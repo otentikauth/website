@@ -1,0 +1,49 @@
+name: Preview Deployment
+
+on:
+  push:
+    branches-ignore: [main]
+    branches: [develop]
+
+# Cancel in progress workflows on pull_requests.
+# https://docs.github.com/en/actions/using-jobs/using-concurrency#example-using-a-fallback-value
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  BEFORE_SHA: ${{ github.event.before }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+jobs:
+  lint:
+    # if main or develop branch go to steps
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run PNPM action
+        uses: ./.github/pnpm-action
+
+      - if: ${{ steps.cache-pnpm.outputs.cache-hit != 'true' }}
+        name: Deps install and lint
+        run: |
+          pnpm install
+          pnpm lint
+
+  deploy-to-vercel:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run pre-deploy action
+        uses: ./.github/predeploy-action
+
+      - name: Deploy website to Vercel
+        uses: ./.github/vercel-action
+        with:
+          project_id: ${{ secrets.VERCEL_PROJECT_ID }}
+          custom_domain: next.otentik.app
+          create_comment: false # Creating pull request comment (set false for staging)
+          is_production: false  # Deploy to production environment (set false for staging)

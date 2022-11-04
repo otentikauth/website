@@ -1,0 +1,26 @@
+# https://stackoverflow.com/questions/59813998/github-actions-splitting-workflow-file
+
+name: predeploy-action
+runs:
+  using: composite
+  steps:
+    - name: Use Node 16
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+
+    - name: Pre-checkout
+      id: script
+      uses: actions/github-script@v3
+      with:
+        script: |
+          const isPr = [ 'pull_request', 'pull_request_target' ].includes(context.eventName)
+          core.setOutput('ref', isPr ? context.payload.pull_request.head.ref : context.ref)
+          core.setOutput('repo', isPr ? context.payload.pull_request.head.repo.full_name : context.repo.full_name)
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ steps.script.outputs.ref }}
+        repository: ${{ steps.script.outputs.repo }}
+        fetch-depth: 0
