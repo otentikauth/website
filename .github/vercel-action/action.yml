@@ -14,6 +14,9 @@ inputs:
   is_production:
     description: key
     required: true
+  github_token:
+    description: key
+    required: true
   create_comment:
     description: key
     required: true
@@ -23,7 +26,7 @@ runs:
     - name: Deploy to Vercel
       uses: BetaHuhn/deploy-to-vercel-action@v1
       with:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
         VERCEL_PROJECT_ID: ${{ inputs.project_id }}
         GITHUB_DEPLOYMENT_ENV: ${{ inputs.deployment_env }}
         CREATE_COMMENT: ${{ inputs.create_comment }} # Create pull request comment?

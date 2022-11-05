@@ -17,7 +17,7 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
 jobs:
-  lint:
+  lint-check:
     # if main or develop branch go to steps
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
           pnpm lint
 
   vercel-deploy:
-    needs: [lint]
+    needs: [lint-check]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -44,6 +44,7 @@ jobs:
         uses: ./.github/vercel-action
         with:
           deployment_env: Preview
+          github_token: ${{ secrets.GH_TOKEN }}
           project_id: ${{ secrets.VERCEL_PROJECT_ID }}
           custom_domain: next.otentik.app
           create_comment: false # Creating pull request comment (set false for staging)
