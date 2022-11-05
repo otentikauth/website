@@ -42,12 +42,17 @@ jobs:
       - name: Run pre-deploy action
         uses: ./.github/predeploy-action
 
-      - name: Deploy website to Vercel
-        uses: ./.github/vercel-action
+      - name: Deploy to Vercel
+        uses: BetaHuhn/deploy-to-vercel-action@v1
         with:
-          deployment_env: Production
-          github_token: ${{ secrets.GH_TOKEN }}
-          project_id: ${{ secrets.VERCEL_PROJECT_ID }}
-          custom_domain: otentik.app
-          create_comment: true # Creating pull request comment (set false for staging)
-          is_production: true  # Deploy to production environment (set false for staging)
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          VERCEL_PROJECT_ID: Production
+          GITHUB_DEPLOYMENT_ENV: ${{ inputs.deployment_env }}
+          CREATE_COMMENT: true # Creating pull request comment (set false for staging)
+          PRODUCTION: true # Deploy to production environment (set false for staging)
+          BUILD_ENV: |
+            PORT=3000
+            NEXT_TELEMETRY_DISABLED=1
+            NODE_ENV=production
+          ALIAS_DOMAINS: otentik.app
+          PR_PREVIEW_DOMAIN: "{REPO}-{PR}.vercel.app"
