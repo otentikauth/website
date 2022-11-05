@@ -32,7 +32,7 @@ jobs:
           pnpm install
           pnpm lint
 
-  deploy-to-vercel:
+  vercel-deploy:
     needs: [lint]
     runs-on: ubuntu-latest
     steps:
@@ -43,6 +43,7 @@ jobs:
       - name: Deploy website to Vercel
         uses: ./.github/vercel-action
         with:
+          deployment_env: Preview
           project_id: ${{ secrets.VERCEL_PROJECT_ID }}
           custom_domain: next.otentik.app
           create_comment: false # Creating pull request comment (set false for staging)
